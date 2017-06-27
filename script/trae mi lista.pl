@@ -2,44 +2,58 @@
 
 use strict;
 use warnings;
-use File::Copy qw(copy move);
+use English;
 
-opendir (DIR, '.') or die "CALAMIDAD!! $!";
+use Path::Tiny;
+use Try::Tiny;
 
-my @listas;
 
-while (my $archivo = readdir(DIR)) {	
-	if ($archivo =~ /.*\.m3u$/){
-		print "He encontrado la lista $archivo !\n";
-		open ENTRADA, "<$archivo";
-		my $carpeta = substr $archivo,0,-4;
-	
-		unless(-e $carpeta or mkdir $carpeta) {
-			die "No he podido crear carpeta $carpeta :(\n";
+# main
+{
+	my @target_directories = map { Path::Tiny::path($ARG) } @ARGV;
+	push @target_directories, Path::Tiny->cwd;
+
+	print "#------------------------------------------#\n";
+	print "#                TackMyList                #\n";
+	print "#------------------------------------------#\n";
+
+	my $copied;
+	for my $target(@target_directories){
+		if($target->exists){
+			$copied += SeekAndCopy($target);
 		}
-
-		my $n=0;
-		my @no_copiadas;
-		print "\tVeamos qué musiquilla tiene...\n\n";
-		while (defined(my $linea = <ENTRADA>)) {
-			chomp($linea);
-			if (substr ($linea,0,1) eq '/'){
-					$n++;
-				my $ok = copy($linea,'./'.$carpeta );
-                my @nombre_cancion = split /\//,$linea;
-                move $carpeta.'/'.$nombre_cancion[-1], 
-                                $carpeta."/".$n.' - '.$nombre_cancion[-1];
-				if( $ok ){
-					print "\t\tcopiado $linea\n";
-				}else{
-					print "\t\tERROR AL COPIAR $linea\n";
-					$n--;
-				}
-			}
-		}
-		print "\n\tHe copiado $n canciones. Lo peto.\n\n";
-		close ENTRADA;
-		}
+	}
+	print "\n\nResumen: He copiado $copied canciones. Lo peto.\n\nya está cosaaa! :)\n\n";
 }
 
-print "ya está cosaaa! :)\n\n";
+
+sub SeekAndCopy {
+	my $directory = shift;
+	my @listas;
+	my $n = 0;
+
+	for my $file ( $directory->children(qr/\.m3u$/) ){
+		
+		print "\nHe encontrado la lista $file !\n";
+
+		my $destino = Path::Tiny->cwd()->child($file->basename('.m3u'));
+		$destino->mkpath;
+
+		print "\n\tVeamos qué musiquilla tiene...\n\n";
+		for my $song_path ( map {Path::Tiny::path($ARG) } $file->lines( {chomp => 1} ) ){
+			if ( $song_path->is_absolute ){
+				if( $song_path->exists and $destino->exists ){
+					$song_path->copy( $destino->child( $song_path->basename) );
+					print "\t\tcopiado $song_path a $destino\n";
+					$n++;
+				}else{
+					print "\t\tERROR AL COPIAR $song_path\n";
+				}
+			}
+
+		}
+	}
+	return $n;
+}
+
+exit 0;
