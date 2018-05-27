@@ -29,7 +29,6 @@ use Try::Tiny;
 
 sub SeekAndCopy {
 	my $directory = shift;
-	my @listas;
 	my $n = 0;
 
 	for my $file ( $directory->children(qr/\.m3u$/) ){
