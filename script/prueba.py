@@ -8,7 +8,7 @@ from spotipy.oauth2 import SpotifyOAuth
 
 
 def _cache_path(username):
-    return os.path.join(os.curdir, '.cache-'+username)
+    return os.path.join(os.curdir, '.cache-' + username)
 
 
 def obtain_token(username):
@@ -39,13 +39,25 @@ def obtain_token(username):
         cachepath = _cache_path(username)
         if os.path.exists(cachepath):
             os.remove(cachepath)
-        print("something bad happened: "+str(e))
+        print("something bad happened: " + str(e))
         sys.exit(2)
 
     if not _token:
-        print("I can't read the auth token for username "+username)
+        print("I can't read the auth token for username " + username)
         sys.exit(2)
     return _token
+
+
+def create_playlist(sp_object, username, name, tracks):
+    """
+    Create a private playlist given a username, a name for the playlist and a list of track ids
+    """
+    try:
+        playlist = sp_object.user_playlist_create(username, name, False)
+        resp = sp_object.user_playlist_add_tracks(username, playlist['id'], tracks)
+    except spotipy.client.SpotifyException as e:
+        print("Something goes wrong while creating playlist: " + str(e))
+    return resp
 
 
 if __name__ == '__main__':
@@ -58,10 +70,12 @@ if __name__ == '__main__':
     token = obtain_token(user_name)
     sp = spotipy.Spotify(auth=token)
 
-    results = sp.search(q='john coltrane', limit=20)
+    results = sp.search(q='artic monkeys', limit=3)
+    track_ids = list(map(lambda x: x['id'], results['tracks']['items']))
+
+#    new_playlist = sp.user_playlist_create(user_name, "DevList", False)
+#    response = sp.user_playlist_add_tracks(user_name, new_playlist['id'], track_ids)
+
     for i, t in enumerate(results['tracks']['items']):
-        print(' ', i, t['name'])
-
-
-
-
+        print('Creating playlist ... ', i, t['name'])
+        create_playlist(sp, user_name, t['name'], [t['id']])
