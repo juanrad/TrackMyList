@@ -5,15 +5,13 @@ from playlistparser import LaneHTMLParser
 from spotipytools import SpotipyTools
 
 if __name__ == '__main__':
-    if len(sys.argv) < 4:
-        print("You need to specify a file, your username, a song and an artist")
-        print("usage: script.py <file.html> <username> <song> <artist>")
+    if len(sys.argv) < 2:
+        print("You need to specify a file and your username")
+        print("usage: script.py <file.html> <username>")
         sys.exit()
 
     html_file = sys.argv[1]
     username = sys.argv[2]
-    song = sys.argv[3]
-    artist = sys.argv[4]
 
     print("")
     print("Reading file...")
@@ -30,8 +28,7 @@ if __name__ == '__main__':
     print("")
     sptools = SpotipyTools(username)
     while True:
-        print("Shall I create a playlist?")
-        user_input = input('Yes or No?: ')
+        user_input = input("Shall I create a playlist? (yes or no?): ")
         if user_input.lower()[0] in ['y', 'n']:
             name = input('Write the name of the playlist:')
             first_track = int(input('Show the above list. Which number is the first track?:'))
@@ -41,10 +38,13 @@ if __name__ == '__main__':
             tracks_found = []
             for track in parser.track_list:
                 try:
+                    print("\t\t"+track['title']+" - "+track['artist']+" ... ", end='', )
                     sp_track = sptools.search(track['title'], track['artist'])
                     tracks_found.append(sp_track['id'])
+                    print("ok!")
                 except spotipytools.TrackNotFound as e:
-                    print(e)
+                    print("")
+                    print("\t\t\t", e.msg, file=sys.stderr, flush=True)
                     next
 
             sptools.create_playlist(name, tracks_found)
