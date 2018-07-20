@@ -5,6 +5,11 @@ import spotipy.util as util
 from spotipy.oauth2 import SpotifyOAuth
 
 
+class TrackNotFound(RuntimeError):
+    def __init__(self, arg):
+        self.args = arg
+
+
 class SpotipyTools:
 
     def __init__(self, username):
@@ -70,6 +75,5 @@ class SpotipyTools:
         response = self.sp.search(q=song+ ' '+ artist, limit=1)
         results = response['tracks']['items']
         if len(results) == 0:
-            print("I can't find a track whith the name " + song + " for the artist " + artist)
-            sys.exit(2)
+            raise TrackNotFound("I can't find a track whith the name " + song + " for the artist " + artist)
         return results[0]
