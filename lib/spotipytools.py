@@ -64,8 +64,8 @@ class SpotipyTools:
         try:
             playlist = self.sp.user_playlist_create(self.username, name, False)
             n = 0
-            while len(tracks[0:nmax]) > 0:
-                subset = tracks[0:nmax]
+            while len(tracks[n:nmax]) > 0:
+                subset = tracks[n:nmax]
                 resp = self.sp.user_playlist_add_tracks(self.username, playlist['id'],
                                                         [track['id'] for track in subset])
                 n += nmax
