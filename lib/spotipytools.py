@@ -55,13 +55,20 @@ class SpotipyTools:
 
     def create_playlist(self, name, tracks):
         """
-        Create a private playlist given a username, a name for the playlist and a list of track ids
+        Create a private playlist given a username, a name for the playlist and a list of track ids.
+        Due to Spotify API limitations, large playlist will be divided into ~100 tracks-list.
         - name: Str, name for the new playlist
         - tracks: list of tracks ids
         """
+        nmax = 100;
         try:
             playlist = self.sp.user_playlist_create(self.username, name, False)
-            resp = self.sp.user_playlist_add_tracks(self.username, playlist['id'], tracks)
+            n = 0
+            while len(tracks[0:nmax]) > 0:
+                subset = tracks[0:nmax]
+                resp = self.sp.user_playlist_add_tracks(self.username, playlist['id'],
+                                                        [track['id'] for track in subset])
+                n += nmax
         except spotipy.client.SpotifyException as e:
             print("Something goes wrong while creating playlist: " + str(e))
         return resp
@@ -72,7 +79,7 @@ class SpotipyTools:
         :return: a track, duh
         """
         query = 'name:' + song + '&artist:' + artist
-        response = self.sp.search(q=song+ ' '+ artist, limit=1)
+        response = self.sp.search(q=song + ' ' + artist, limit=1)
         results = response['tracks']['items']
         if len(results) == 0:
             error_message = "I can't find a track whith the name " + song + " for the artist " + artist

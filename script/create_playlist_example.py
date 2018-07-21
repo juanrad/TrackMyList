@@ -15,6 +15,6 @@ if __name__ == '__main__':
 
     sptools = SpotipyTools(username)
     track = sptools.search(song, artist)
-    sptools.create_playlist(username+'_creates_'+song, [track['id']])
+    sptools.create_playlist(username+'_creates_'+song, [track])
 
 
