@@ -38,12 +38,11 @@ if __name__ == '__main__':
             tracks_found = []
             for track in parser.track_list:
                 try:
-                    print("\t\t"+track['title']+" - "+track['artist']+" ... ", end='', )
-                    track_found = sptools.search(track['title'], track['artist'])
-                    tracks_found.append(track_found)
+                    print("\t\t"+track['title']+" - "+track['artist']+" ... ", end='')
+                    tracks_found.append(sptools.search(track['title'], track['artist']))
                     print("ok!")
                 except spotipytools.TrackNotFound as e:
-                    print("")
+                    print("", flush=True)
                     print("\t\t\t", e.msg, file=sys.stderr, flush=True)
                     next
 

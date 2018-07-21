@@ -64,14 +64,13 @@ class SpotipyTools:
         try:
             playlist = self.sp.user_playlist_create(self.username, name, False)
             n = 0
-            while len(tracks[n:nmax]) > 0:
-                subset = tracks[n:nmax]
-                resp = self.sp.user_playlist_add_tracks(self.username, playlist['id'],
+            while len(tracks[n:n+nmax]) > 0:
+                subset = tracks[n:n+nmax]
+                self.sp.user_playlist_add_tracks(self.username, playlist['id'],
                                                         [track['id'] for track in subset])
                 n += nmax
         except spotipy.client.SpotifyException as e:
             print("Something goes wrong while creating playlist: " + str(e))
-        return resp
 
     def search(self, song, artist):
         """
