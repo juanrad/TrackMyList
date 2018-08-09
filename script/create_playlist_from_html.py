@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
     print("")
     print("Reading file...")
-    parser = LaneHTMLParser(html_file)
+    parser = LaneHTMLParser(html_file=html_file)
     parser.parse()
     print("Done!")
 
