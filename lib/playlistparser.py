@@ -21,6 +21,7 @@ class LaneHTMLParser(HTMLParser):
         self.track_list = []
         self.found_song = False
         self.found_artist = False
+        self.cached_title = None
         super().__init__()
 
     def parse(self):
@@ -53,19 +54,15 @@ class LaneHTMLParser(HTMLParser):
             read_data = f.read()
             self.feed(read_data)
 
-    # def handle_endtag(self, tag):
-    #     print("End tag:", tag)
-
     def handle_starttag(self, tag, attributes):
-        print("Start tag:", tag)
         for attr in attributes:
             try:
-            #     print(attr)
                 if any(re.search('album', attr[i]) for i in range(0, len(attr))):
                     self.found_song = True
                     self.found_artist = False
                     return
                 elif any(re.search('artist', attr[i]) for i in range(0, len(attr))):
+                    # TODO: here appears some interesnting json to parse in the future
                     self.found_song = False
                     self.found_artist = True
                     return
@@ -81,13 +78,14 @@ class LaneHTMLParser(HTMLParser):
             if not re.match(r'^\s+$', data) and not re.match(r'\d+\:\d', data) and data[0] != "\n":
                 data = data.strip()
                 if self.found_song:
-                    print('track: '+data)
+                    # print('track: '+data)
                     self.cached_title = data
                 elif self.found_artist:
-                    print('artist: '+data)
+                    # print('artist: '+data)
                     track = {'title': self.cached_title, 'artist': data}
                     self.track_list.append(track)
-                else:
-                    print("i dont know what is " + data)
+                    self.cached_title = None
+                # else:
+                #     print("i dont know what is " + data)
         except Exception:
             pass
