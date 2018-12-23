@@ -44,6 +44,8 @@ class LaneHTMLParser(HTMLParser):
             return
         self.playlist_name = re.findall("listen,([\w\s]+),", list_info)[0]
         self.author = re.findall("listen,[\w\s]+,([\w\s]+)", list_info)[0]
+        self.playlist_name.strip();
+        self.author.strip();
 
     def _parse_url(self):
         web = requests.get(self.url)
@@ -82,6 +84,8 @@ class LaneHTMLParser(HTMLParser):
                     self.cached_title = data
                 elif self.found_artist:
                     # print('artist: '+data)
+                    if not self.cached_title:
+                        return
                     track = {'title': self.cached_title, 'artist': data}
                     self.track_list.append(track)
                     self.cached_title = None
